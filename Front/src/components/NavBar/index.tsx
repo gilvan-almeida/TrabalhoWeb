@@ -3,9 +3,9 @@ import { PackageSearch, LogIn } from 'lucide-react';
 function Navbar() {
   return (
     <nav className="w-full">
-      <div className="bg-[#1a1a1a] text-gray-400 py-2 px-8 text-xs uppercase tracking-widest">
+      {/* <div className="bg-[#1a1a1a] text-gray-400 py-2 px-8 text-xs uppercase tracking-widest">
         <span>Home</span>
-      </div>
+      </div> */}
 
       <div className="bg-[#d9d9d9] py-6 px-8 flex items-center justify-between shadow-sm">
         
