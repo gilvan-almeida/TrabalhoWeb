@@ -1,17 +1,16 @@
 import React from "react";
 import ButtonComp from "../../components/Button";
+import CardObject from "../../components/CardObject";
+import Navbar from "../../components/NavBar";
 
 function HomePage(){
     return(
         <div>
+            <Navbar/>
             <h1>
                 Home Page
             </h1>
-            <ButtonComp
-                text="Ola"
-                color="red"
-                textColor="white"
-            />
+            <CardObject/>
         </div>
     )
 }
