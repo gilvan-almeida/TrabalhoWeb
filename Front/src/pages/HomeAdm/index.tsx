@@ -1,9 +1,23 @@
+import { useState } from "react";
+import NavBarAdm from "../../components/NavBarAdm";
+import Sidebar from "../../components/Sidebar";
+
+
 function HomeAdmPage(){
+
+    const [menuOpen, setMenuOpen] = useState(false)
+
+
     return(
         <div>
-            <h1>
-                HomeAdmPage
-            </h1>
+            <NavBarAdm
+                openMenu={()=> setMenuOpen(true)}
+            />
+            <Sidebar
+                isOpen={menuOpen}
+                onClose={() => setMenuOpen(false)}
+            />
+            
         </div>
     )
 }

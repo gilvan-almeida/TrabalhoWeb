@@ -1,6 +1,10 @@
 import { MapPin, Calendar } from 'lucide-react';
 
-function CardObject() {
+interface CardObjectProps{
+    adminMode: boolean,
+}
+
+function CardObject({adminMode}: CardObjectProps) {
   return (
     <div className="max-w-sm rounded-3xl overflow-hidden shadow-lg bg-white border border-gray-100 font-sans">
 
@@ -34,6 +38,11 @@ function CardObject() {
             <span className="text-sm font-medium">12/12/2025 - 14:30Hrs</span>
           </div>
         </div>
+        {adminMode && (
+          <button className="w-full bg-[#0047ff] hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition-all active:scale-95 mt-2">
+            Registrar Coleta
+          </button>
+        )}
       </div>
     </div>
   );
