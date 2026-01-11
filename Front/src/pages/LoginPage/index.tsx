@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowLeft, User } from 'lucide-react';
 
 function LoginPage() {

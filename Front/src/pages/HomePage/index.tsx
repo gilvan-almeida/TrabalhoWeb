@@ -1,9 +1,15 @@
-import React from "react";
+import { useNavigate } from "react-router-dom"; // 1. Importar o hook de navegação
 import CardObject from "../../components/CardObject";
 import Navbar from "../../components/NavBar";
 import PesquisaBar from "../../components/PesquisaBar";
 
 function HomePage() {
+  const navigate = useNavigate(); 
+
+  const handleCardClick = (id: string) => {
+    navigate(`/item/${id}`);
+  };
+
   return (
     <div className="min-h-screen bg-white font-sans">
       <Navbar />
@@ -24,9 +30,28 @@ function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
-          <CardObject />
-          <CardObject />
-          <CardObject />
+          
+          <div 
+            onClick={() => handleCardClick("1")} 
+            className="cursor-pointer transition-transform hover:scale-105"
+          >
+            <CardObject />
+          </div>
+
+          <div 
+            onClick={() => handleCardClick("2")} 
+            className="cursor-pointer transition-transform hover:scale-105"
+          >
+            <CardObject />
+          </div>
+
+          <div 
+            onClick={() => handleCardClick("3")} 
+            className="cursor-pointer transition-transform hover:scale-105"
+          >
+            <CardObject />
+          </div>
+
         </div>
         
       </main>
