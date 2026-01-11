@@ -24,9 +24,14 @@ function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
-          <CardObject />
-          <CardObject />
-          <CardObject />
+            <CardObject 
+                adminMode={false}
+                title="Relógio Cassio"
+                category="Acessórios"
+                location="Biblioteca - 2 bloco"
+                date="12/12/2025 - 14:30Hrs"
+                imageUrl="https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop"
+            />
         </div>
         
       </main>
