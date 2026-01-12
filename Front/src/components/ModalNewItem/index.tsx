@@ -1,14 +1,52 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import api from '../../Services/Api';
 
 interface ModalNewItemProps {
     isOpen: boolean;
     onClose: () => void;
+    onSuccess: () => void;
 }
 
-function ModalNewItems({ isOpen, onClose }: ModalNewItemProps) {
+function ModalNewItems({ isOpen, onClose, onSuccess }: ModalNewItemProps) {
     if (!isOpen) return null;
+
+    const [formData, setFormData] = useState({
+        title: '',
+        category: '',
+        description: '',
+        location: '',
+        date: '',
+        time: ''
+    });
+
+    const [loading, setLoading] = useState(false);
     const [fileName, setFileName] = useState("Selecionar arquivo...");
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+
+        try {
+            await api.post("/items", {
+                title: formData.title,
+                category: formData.category,
+                description: formData.description,
+                location: formData.location,
+                found_at: `${formData.date}T${formData.time}:00`,
+                status: 'disponivel'
+            });
+
+            alert("Item cadastrado com sucesso!");
+            onSuccess(); 
+            onClose();  
+        } catch (error) {
+            console.error("Erro ao cadastrar:", error);
+            alert("Erro ao cadastrar item.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="fixed inset-0 bg-black/50 z-[70] flex items-center justify-center p-4">
@@ -101,6 +139,7 @@ function ModalNewItems({ isOpen, onClose }: ModalNewItemProps) {
                         </button>
                         <button
                             type="submit"
+                            disabled={loading}
                             className="flex-1 bg-[#0047ff] hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg"
                         >
                             Cadastrar

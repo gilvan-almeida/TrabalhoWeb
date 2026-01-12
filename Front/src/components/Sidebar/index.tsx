@@ -1,4 +1,5 @@
 import { PackageSearch, Home, Box, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface mainSidebar {
     isOpen: boolean,
@@ -6,6 +7,9 @@ interface mainSidebar {
 }
 
 function Sidebar({ isOpen, onClose }: mainSidebar) {
+
+    const navigation = useNavigate();
+
     return (
         <>
             {isOpen && (
@@ -29,14 +33,18 @@ function Sidebar({ isOpen, onClose }: mainSidebar) {
                 </div>
 
                 <nav className="p-4 space-y-4">
-                    <button className="w-full flex items-center gap-4 bg-[#d9d9d9] hover:bg-gray-300 p-3 rounded-xl shadow-sm transition-all group">
+                    <button className="w-full flex items-center gap-4 bg-[#d9d9d9] hover:bg-gray-300 p-3 rounded-xl shadow-sm transition-all group"
+                        onClick={() => navigation("/homeAdm")}
+                    >
                         <div className="bg-black p-2 rounded-lg text-white">
                             <Home size={20} />
                         </div>
                         <span className="font-bold text-gray-800 text-lg">Início</span>
                     </button>
 
-                    <button className="w-full flex items-center gap-4 bg-[#d9d9d9] hover:bg-gray-300 p-3 rounded-xl shadow-sm transition-all group">
+                    <button 
+                        className="w-full flex items-center gap-4 bg-[#d9d9d9] hover:bg-gray-300 p-3 rounded-xl shadow-sm transition-all group"
+                        onClick={() => navigation("/managerPage")}>
                         <div className="bg-black p-2 rounded-lg text-white">
                             <Box size={20} />
                         </div>
@@ -47,6 +55,7 @@ function Sidebar({ isOpen, onClose }: mainSidebar) {
 
                     <button
                         className="w-full flex items-center gap-4 bg-[#d9d9d9] hover:bg-gray-300 p-3 rounded-xl shadow-sm transition-all group"
+                        onClick={() => navigation("/managerUser")}
                     >
                         <div className="bg-black p-2 rounded-lg text-white  transition-colors">
                             <Users size={20} />

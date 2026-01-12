@@ -4,7 +4,7 @@ import { X } from 'lucide-react';
 interface ModalColetaProps {
     isOpen: boolean,
     onClose: () => void,
-    itemNome: string
+    itemNome: string,
 }
 
 

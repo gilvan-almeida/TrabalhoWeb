@@ -2,7 +2,6 @@ const { supabase } = require("../Config/Supabase");
 
 const getStatistics = async (req, res) => {
     try {
-        // Total de itens
         const { count: totalItems, error: countError } = await supabase
             .from('items')
             .select('*', { count: 'exact', head: true });
