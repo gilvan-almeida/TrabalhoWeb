@@ -6,11 +6,32 @@ import PesquisaBar from "../../components/PesquisaBar";
 import CardObject from "../../components/CardObject";   
 import ModalColeta from "../../components/ModalColeta";
 import { Package, Clock, CheckCircle } from "lucide-react";
+import { useEffect } from "react";
+
+import api from "../../Services/Api"
 
 function HomeAdmPage() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [itemSelecionado, setItemSelecionado] = useState("");
+
+    const [itens, setItens] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const carregarItens = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get("/items");
+            setItens(response.data);
+        } catch (error) {
+            console.error("Erro ao buscar itens:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    useEffect(() => {
+        carregarItens();
+    }, []);
 
 
     const abrirModal = (nomeItem: string) => {
@@ -56,15 +77,24 @@ function HomeAdmPage() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
-                        <CardObject 
-                            adminMode={true}
-                            title="Relógio Cassio"
-                            category="Acessórios"
-                            location="Biblioteca - 2 bloco"
-                            date="12/12/2025 - 14:30Hrs"
-                            imageUrl="https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop"
-                            openModal={abrirModal} 
-                        />
+                        {loading ? (
+                            <p>Carregando itens...</p>
+                        ) : itens.length > 0 ? (
+                            itens.map((item: any) => (
+                                <CardObject 
+                                    key={item.id}
+                                    adminMode={true}
+                                    title={item.title}
+                                    category={item.category}
+                                    location={item.location}
+                                    date={new Date(item.created_at).toLocaleString('pt-BR')}
+                                    imageUrl={item.image_url || "https://via.placeholder.com/150"}
+                                    openModal={() => abrirModal(item.title)} 
+                                />
+                            ))
+                        ) : (
+                            <p>Nenhum item encontrado.</p>
+                        )}
                     </div>
                 </section>
 

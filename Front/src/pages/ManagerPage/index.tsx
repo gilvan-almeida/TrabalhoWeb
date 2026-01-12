@@ -6,6 +6,9 @@ import Sidebar from "../../components/Sidebar";
 import ModalNewItems from "../../components/ModalNewItem";
 import ModalEditItem from "../../components/ModalEdit";
 import ModalAlert from "../../components/ModalAlert";
+import api from '../../Services/Api';
+
+import { useEffect } from "react";
 
 function ManagerPage() {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -14,6 +17,25 @@ function ManagerPage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [itemParaExcluir, setItemParaExcluir] = useState<any>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    const [itens, setItens] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const buscarItens = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get("/items"); 
+            setItens(response.data);
+        } catch (error) {
+            console.error("Erro ao carregar tabela:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        buscarItens();
+    }, []);
 
     const abrirEdicao = (item: any) => {
         setItemParaEditar(item);
@@ -30,12 +52,6 @@ function ManagerPage() {
         setIsDeleteModalOpen(true); 
     };
 
-    const mockItens = [
-        { id: 1, nome: "Relogio Cassio", imagemUrl:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop", categoria: "Acessórios", local: "Laboratório", data: "12/12/2025", status: "Pendente" },
-        { id: 2, nome: "Relogio Cassio", imagemUrl:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop", categoria: "Acessórios", local: "Laboratório", data: "12/12/2025", status: "Pendente" },
-        { id: 3, nome: "Relogio Cassio", imagemUrl:"https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop",categoria: "Acessórios", local: "Laboratório", data: "12/12/2025", status: "Pendente" },
-    ];
-
     return (
         <div className="min-h-screen bg-white">
 
@@ -44,6 +60,7 @@ function ManagerPage() {
             <ModalNewItems 
                 isOpen={modalCadastroOpen} 
                 onClose={() => setModalCadastroOpen(false)} 
+                onSuccess={buscarItens}
             />
             
             <ModalEditItem 
@@ -80,7 +97,25 @@ function ManagerPage() {
                 </div>
 
                 <div className="mt-4">
-                    <TableDados data={mockItens} onEdit={abrirEdicao} onDelete={abrirConfirmacaoDelete}/>
+                    {loading ? (
+                        <div className="text-center py-10">Carregando dados da tabela...</div>
+                    ) : itens.length > 0 ? (
+                        <TableDados 
+                            data={itens}
+                            onEdit={abrirEdicao} 
+                            onDelete={abrirConfirmacaoDelete}
+                        />
+                    ) : (
+                        <div className="text-center py-20 border-2 border-dashed border-gray-200 rounded-xl">
+                            <p className="text-gray-500 text-lg">Nenhum item cadastrado no momento.</p>
+                            <button 
+                                onClick={() => setModalCadastroOpen(true)}
+                                className="mt-4 text-blue-600 font-bold hover:underline"
+                            >
+                                Cadastrar o primeiro item
+                            </button>
+                        </div>
+                    )}
                 </div>
             </main>
         </div>
