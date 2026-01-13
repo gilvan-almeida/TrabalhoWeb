@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import { supabase } from '../../Services/Supabase';
 import api from '../../Services/Api';
 
 interface ModalNewItemProps {
@@ -22,25 +23,53 @@ function ModalNewItems({ isOpen, onClose, onSuccess }: ModalNewItemProps) {
 
     const [loading, setLoading] = useState(false);
     const [fileName, setFileName] = useState("Selecionar arquivo...");
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            await api.post("/items", {
+            let publicUrl = "";
+
+            if (selectedFile) {
+                const uniqueFileName = `${Date.now()}-${selectedFile.name}`;
+                
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('ImagensSystem')
+                    .upload(uniqueFileName, selectedFile);
+
+                if (uploadError) throw uploadError;
+
+                const { data: urlData } = supabase.storage
+                    .from('ImagensSystem')
+                    .getPublicUrl(uniqueFileName);
+                
+                publicUrl = urlData.publicUrl;
+            }
+
+            const payload = {
                 title: formData.title,
                 category: formData.category,
                 description: formData.description,
                 location: formData.location,
-                found_at: `${formData.date}T${formData.time}:00`,
-                status: 'disponivel'
-            });
+                date_found: formData.date,
+                time_found: formData.time,
+                image_url: publicUrl, 
+                status: 'available'
+            };
+
+            await api.post("/items", payload);
 
             alert("Item cadastrado com sucesso!");
             onSuccess(); 
-            onClose();  
-        } catch (error) {
+            onClose();
+        } catch (error: any) {
             console.error("Erro ao cadastrar:", error);
             alert("Erro ao cadastrar item.");
         } finally {
@@ -63,20 +92,35 @@ function ModalNewItems({ isOpen, onClose, onSuccess }: ModalNewItemProps) {
                     Registrar Novo Item
                 </h2>
 
-                <form className="space-y-4">
+                <form className="space-y-4" onSubmit={handleSubmit}>
                     <div className="space-y-1">
                         <label className="text-sm font-medium text-gray-600 ml-1 text-[13px]">Nome do Objeto:</label>
-                        <input className="w-full bg-[#d9d9d9] border-none rounded-xl py-2 px-4 shadow-inner outline-none" />
+                        <input 
+                            name="title"
+                            value={formData.title}
+                            onChange={handleChange}
+                            required
+                            className="w-full bg-[#d9d9d9] border-none rounded-xl py-2 px-4 shadow-inner outline-none" 
+                        />
                     </div>
 
                     <div className="space-y-1">
                         <label className="text-sm font-medium text-gray-600 ml-1 text-[13px]">Categoria:</label>
-                        <input className="w-full bg-[#d9d9d9] border-none rounded-xl py-2 px-4 shadow-inner outline-none" />
+                        <input 
+                            name="category"
+                            value={formData.category}
+                            onChange={handleChange}
+                            required
+                            className="w-full bg-[#d9d9d9] border-none rounded-xl py-2 px-4 shadow-inner outline-none" 
+                        />
                     </div>
 
                     <div className="space-y-1">
                         <label className="text-sm font-medium text-gray-600 ml-1 text-[13px]">Descrição:</label>
                         <textarea
+                            name="description"
+                            value={formData.description}
+                            onChange={handleChange}
                             rows={3}
                             className="w-full bg-[#d9d9d9] border-none rounded-xl py-2 px-4 shadow-inner outline-none resize-none"
                         />
@@ -84,47 +128,74 @@ function ModalNewItems({ isOpen, onClose, onSuccess }: ModalNewItemProps) {
 
                     <div className="space-y-1">
                         <label className="text-sm font-medium text-gray-600 ml-1 text-[13px]">Local onde foi encontrado:</label>
-                        <input className="w-full bg-[#d9d9d9] border-none rounded-xl py-2 px-4 shadow-inner outline-none" />
+                        <input 
+                            name="location"
+                            value={formData.location}
+                            onChange={handleChange}
+                            required
+                            className="w-full bg-[#d9d9d9] border-none rounded-xl py-2 px-4 shadow-inner outline-none" 
+                        />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
                             <label className="text-sm font-medium text-gray-600 ml-1 text-[13px]">Data:</label>
-                            <input type="date" className="w-full bg-[#d9d9d9] border-none rounded-xl py-2 px-4 shadow-inner outline-none text-xs" />
+                            <input 
+                                type="date" 
+                                name="date"
+                                value={formData.date}
+                                onChange={handleChange}
+                                required
+                                className="w-full bg-[#d9d9d9] border-none rounded-xl py-2 px-4 shadow-inner outline-none text-xs" 
+                            />
                         </div>
                         <div className="space-y-1">
                             <label className="text-sm font-medium text-gray-600 ml-1 text-[13px]">Hora:</label>
-                            <input type="time" className="w-full bg-[#d9d9d9] border-none rounded-xl py-2 px-4 shadow-inner outline-none text-xs" />
+                            <input 
+                                type="time" 
+                                name="time"
+                                value={formData.time}
+                                onChange={handleChange}
+                                required
+                                className="w-full bg-[#d9d9d9] border-none rounded-xl py-2 px-4 shadow-inner outline-none text-xs" 
+                            />
                         </div>
                     </div>
 
                     <div className="space-y-1">
                         <label className="text-sm font-medium text-gray-600 ml-1 text-[13px]">
-                            Image:
+                            Imagem:
                         </label>
                         <label className="flex items-center w-full bg-[#d9d9d9] border-none rounded-xl py-2 px-4 shadow-inner cursor-pointer hover:bg-gray-300 transition-colors">
-                            <span className="text-gray-500 text-sm">Selecionar arquivo...</span>
+                            <span className="text-gray-500 text-sm">{fileName}</span>
                             <input 
                                 type="file" 
                                 accept="image/*" 
                                 className="hidden" 
                                 onChange={(e) => {
                                     const file = e.target.files?.[0];
-                                    if (file) setFileName(file.name); 
+                                    if (file) {
+                                        setSelectedFile(file); 
+                                        setFileName(file.name); 
+                                    }
                                 }}
-                                />
+                            />
                         </label>
                         {fileName !== "Selecionar arquivo..." && (
                             <div className="mt-2 ml-1 flex items-center gap-2">
-                            <span className="text-[12px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md border border-blue-100 truncate max-w-full">
-                                📎 {fileName}
-                            </span>
-                            <button 
-                                onClick={() => setFileName("Selecionar arquivo...")}
-                                className="text-red-500 text-[10px] font-bold hover:underline"
-                            >
-                                Remover
-                            </button>
+                                <span className="text-[12px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md border border-blue-100 truncate max-w-full">
+                                    📎 {fileName}
+                                </span>
+                                <button 
+                                    type="button"
+                                    onClick={() => {
+                                        setFileName("Selecionar arquivo...");
+                                        setSelectedFile(null);
+                                    }}
+                                    className="text-red-500 text-[10px] font-bold hover:underline"
+                                >
+                                    Remover
+                                </button>
                             </div>
                         )}
                     </div>
@@ -140,9 +211,9 @@ function ModalNewItems({ isOpen, onClose, onSuccess }: ModalNewItemProps) {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 bg-[#0047ff] hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg"
+                            className="flex-1 bg-[#0047ff] hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors shadow-lg disabled:opacity-50"
                         >
-                            Cadastrar
+                            {loading ? "Enviando..." : "Cadastrar"}
                         </button>
                     </div>
                 </form>

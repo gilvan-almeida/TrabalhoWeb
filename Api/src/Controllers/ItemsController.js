@@ -1,39 +1,16 @@
 const { supabase } = require("../Config/Supabase");
-const multer = require('multer');
 
 const getItems = async (req, res) => {
     try {
-        const { search, category, status, limit = 20, page = 1 } = req.query;
-        let query = supabase.from('items').select('*', { count: 'exact' });
-
-        if (search) {
-            query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%,location.ilike.%${search}%`);
-        }
-        if (category) {
-            query = query.eq('category', category);
-        }
-        if (status) {
-            query = query.eq('status', status);
-        }
-
-
-        const from = (page - 1) * limit;
-        const to = from + limit - 1;
-        query = query.range(from, to).order('created_at', { ascending: false });
-
-        const { data, error, count } = await query;
+        const { data, error } = await supabase
+            .from('items')
+            .select('*')
+            .order('created_at', { ascending: false });
 
         if (error) throw error;
 
-        res.json({
-            items: data,
-            pagination: {
-                total: count,
-                page: parseInt(page),
-                limit: parseInt(limit),
-                totalPages: Math.ceil(count / limit)
-            }
-        });
+        res.json(data);  
+        
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -64,12 +41,14 @@ const createItem = async (req, res) => {
             title,
             category,
             location,
-            date,
-            time,
+            date_found,   
+            time_found,
             description,
             image_url,
             status = 'available'
         } = req.body;
+
+        // console.log('Dados recebidos:', req.body);
 
 
         if (!title || !category || !location) {
@@ -82,20 +61,24 @@ const createItem = async (req, res) => {
                 title,
                 category,
                 location,
-                date_found: date,
-                time_found: time,
+                date_found: date_found,
+                time_found: time_found,
                 description,
                 image_url,
                 status,
-                created_at: new Date()
+                created_at: new Date().toISOString()
             }])
             .select()
             .single();
 
-        if (error) throw error;
+        if (error) {
+            // console.error('Erro ao inserir no Supabase:', error);
+            throw error;
+        }
 
         res.status(201).json({ message: 'Item criado com sucesso', item: data });
     } catch (error) {
+        // console.error('Erro no createItem:', error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -104,32 +87,32 @@ const createItem = async (req, res) => {
 const updateItem = async (req, res) => {
     try {
         const { id } = req.params;
-        const updateData = req.body;
+        const { title, category, location, status } = req.body;
 
-        const { data: existingItem, error: fetchError } = await supabase
-            .from('items')
-            .select('*')
-            .eq('id', id)
-            .single();
-
-        if (fetchError || !existingItem) {
-            return res.status(404).json({ error: 'Item não encontrado' });
-        }
+        console.log("Tentando atualizar o item ID:", id);
+        console.log("Dados recebidos:", req.body);
 
         const { data, error } = await supabase
             .from('items')
             .update({
-                ...updateData,
-                updated_at: new Date()
+                title,
+                category,
+                location,
+                status,
+                updated_at: new Date().toISOString()
             })
             .eq('id', id)
-            .select()
-            .single();
+            .select(); 
 
         if (error) throw error;
 
-        res.json({ message: 'Item atualizado com sucesso', item: data });
+        if (!data || data.length === 0) {
+            return res.status(404).json({ error: 'Item não encontrado ou sem permissão para editar' });
+        }
+
+        res.json({ message: 'Item atualizado com sucesso', item: data[0] });
     } catch (error) {
+        console.error("Erro no updateItem:", error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -138,15 +121,25 @@ const deleteItem = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const { error } = await supabase
+        const { data, error } = await supabase
             .from('items')
             .delete()
-            .eq('id', id);
+            .eq('id', id)
+            .select();
 
-        if (error) throw error;
+        if (error) {
+            console.error("Erro no Supabase ao deletar:", error);
+            throw error;
+        }
+        if (!data || data.length === 0) {
+            return res.status(404).json({ 
+                error: 'Item não encontrado ou você não tem permissão para excluí-lo' 
+            });
+        }
 
-        res.json({ message: 'Item excluído com sucesso' });
+        res.json({ message: 'Item excluído com sucesso', deletedItem: data[0] });
     } catch (error) {
+        console.error("Erro no deleteItem:", error);
         res.status(500).json({ error: error.message });
     }
 };

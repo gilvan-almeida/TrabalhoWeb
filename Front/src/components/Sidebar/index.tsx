@@ -55,6 +55,18 @@ function Sidebar({ isOpen, onClose }: mainSidebar) {
 
                     <button
                         className="w-full flex items-center gap-4 bg-[#d9d9d9] hover:bg-gray-300 p-3 rounded-xl shadow-sm transition-all group"
+                        onClick={() => navigation("/perfil")}
+                        >
+                        <div className="bg-black p-2 rounded-lg text-white  transition-colors">
+                            <Users size={20} />
+                        </div>
+                        <span className="font-bold text-gray-800 text-lg text-left leading-tight">
+                            Perfil
+                        </span>
+                    </button>
+
+                    <button
+                        className="w-full flex items-center gap-4 bg-[#d9d9d9] hover:bg-gray-300 p-3 rounded-xl shadow-sm transition-all group"
                         onClick={() => navigation("/managerUser")}
                     >
                         <div className="bg-black p-2 rounded-lg text-white  transition-colors">
@@ -64,7 +76,6 @@ function Sidebar({ isOpen, onClose }: mainSidebar) {
                             Gerenciar<br />usuários
                         </span>
                     </button>
-
                 </nav>
 
             </div>

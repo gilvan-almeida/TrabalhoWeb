@@ -36,7 +36,7 @@ const getUserById = async (req, res) => {
 
 const createUser = async (req, res) => {
     try {
-        const { name, email, password, role = 'employee' } = req.body;
+        const { name, email, password, role = 'user' } = req.body;
 
         if (!name || !email || !password) {
             return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
@@ -90,13 +90,17 @@ const updateUser = async (req, res) => {
             .from('users')
             .update(updateData)
             .eq('id', id)
-            .select('id, name, email, role, status, created_at')
-            .single();
+            .select('id, name, email, role, status, created_at'); 
 
         if (error) throw error;
 
-        res.json({ message: 'Usuário atualizado com sucesso', user: data });
+        if (!data || data.length === 0) {
+            return res.status(404).json({ error: 'Usuário não encontrado ou nenhuma alteração feita' });
+        }
+
+        res.json({ message: 'Usuário atualizado com sucesso', user: data[0] });
     } catch (error) {
+        console.error("Erro no servidor:", error.message);
         res.status(500).json({ error: error.message });
     }
 };

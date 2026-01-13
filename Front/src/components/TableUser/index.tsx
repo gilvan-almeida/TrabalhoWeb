@@ -2,9 +2,9 @@ import { Pencil, Trash2, User } from 'lucide-react';
 
 interface UserItem {
     id: number;
-    nome: string;
+    name: string;
     email: string;
-    cargo: string;
+    role: string;
     status: string;
 }
 
@@ -33,12 +33,12 @@ function TableUser({ data, onEdit, onDelete }: UsersTableProps) {
                                 <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                                     <User size={20} className="text-gray-500" />
                                 </div>
-                                {user.nome}
+                                {user.name}
                             </td>
                             <td className="px-6 py-4 text-gray-600">{user.email}</td>
                             <td className="px-6 py-4">
                                 <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
-                                    {user.cargo}
+                                    {user.role}
                                 </span>
                             </td>
                             <td className="px-6 py-4">

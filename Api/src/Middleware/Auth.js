@@ -32,4 +32,21 @@ const authorize = (...roles) => {
     };
 };
 
-module.exports = { authenticate, authorize };
+const authorizeSelfOrAdmin = (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+    }
+
+    const userIdFromToken = String(req.user.id); 
+    const idFromParams = String(req.params.id); 
+
+    if (req.user.role === 'admin' || userIdFromToken === idFromParams) {
+        return next();
+    }
+
+    return res.status(403).json({ 
+        error: 'Acesso negado. Você só pode gerenciar sua própria conta ou ser um administrador.' 
+    });
+};
+
+module.exports = { authenticate, authorize, authorizeSelfOrAdmin };

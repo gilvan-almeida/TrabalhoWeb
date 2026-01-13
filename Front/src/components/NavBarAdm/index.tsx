@@ -1,6 +1,7 @@
 import { Menu, PackageSearch, LogOut } from 'lucide-react';
 import Sidebar from '../Sidebar';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 
 interface mainNavbarAdm{
@@ -9,6 +10,8 @@ interface mainNavbarAdm{
 
 
 function NavBarAdm({openMenu}: mainNavbarAdm) {
+
+    const navigation = useNavigate();
 
     return (
         <nav className="w-full">
@@ -36,7 +39,9 @@ function NavBarAdm({openMenu}: mainNavbarAdm) {
                     </div>
                 </div>
 
-                <button className="flex items-center gap-2 text-black hover:text-red-600 font-bold text-xl transition-colors group">
+                <button 
+                    className="flex items-center gap-2 text-black hover:text-red-600 font-bold text-xl transition-colors group"
+                    onClick={()=>navigation("/")}>
                     <LogOut size={24} className="group-hover:translate-x-1 transition-transform" />
                     <span>Sair</span>
                 </button>

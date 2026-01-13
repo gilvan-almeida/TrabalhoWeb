@@ -1,4 +1,5 @@
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
+import { useState } from 'react';
 
 interface ModalAlertProps {
     isOpen: boolean;
@@ -8,7 +9,15 @@ interface ModalAlertProps {
 }
 
 function ModalAlert({ isOpen, onClose, onConfirm, itemName }: ModalAlertProps) {
+    const [isDeleting, setIsDeleting] = useState(false);
+
     if (!isOpen) return null;
+
+    const handleConfirm = async () => {
+        setIsDeleting(true);
+        await onConfirm();
+        setIsDeleting(false);
+    };
 
     return (
         <div className="fixed inset-0 bg-black/50 z-[90] flex items-center justify-center p-4">
@@ -29,15 +38,17 @@ function ModalAlert({ isOpen, onClose, onConfirm, itemName }: ModalAlertProps) {
                 <div className="flex gap-4">
                     <button 
                         onClick={onClose}
-                        className="flex-1 bg-gray-200 hover:bg-gray-300 text-black font-bold py-3 rounded-xl transition-all"
+                        disabled={isDeleting}
+                        className="flex-1 bg-gray-200 hover:bg-gray-300 text-black font-bold py-3 rounded-xl transition-all disabled:opacity-50"
                     >
                         Não, voltar
                     </button>
                     <button 
-                        onClick={onConfirm}
-                        className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-200 transition-all"
+                        onClick={handleConfirm}
+                        disabled={isDeleting}
+                        className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl shadow-lg transition-all disabled:opacity-50"
                     >
-                        Sim, apagar
+                        {isDeleting ? "Apagando..." : "Sim, apagar"}
                     </button>
                 </div>
             </div>
