@@ -1,13 +1,14 @@
 import { Pencil, Trash2 } from 'lucide-react';
+import { formatarDataBR } from '../../utils/FormatDate';
 
 interface Item {
   id: number,
-  nome: string,
-  categoria: string,
-  local: string,
-  data: string,
+  title: string,
+  category: string,
+  location: string,
+  date_found: string,
   status: string,
-  imagemUrl: string,
+  image_url: string,
 }
 
 interface ItemsTableProps {
@@ -35,10 +36,10 @@ function TableDados({ data, onEdit, onDelete }: ItemsTableProps) {
             <tr key={item.id} className="border-b border-black last:border-none">
               <td className="px-6 py-4 flex items-center gap-3">
                 <div className="w-12 h-12 bg-[#d9d9d9] rounded-lg overflow-hidden flex-shrink-0 border border-gray-300">
-                  {item.imagemUrl ? (
+                  {item.image_url ? (
                     <img 
-                      src={item.imagemUrl} 
-                      alt={item.nome} 
+                      src={item.image_url} 
+                      alt={item.title} 
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -47,12 +48,12 @@ function TableDados({ data, onEdit, onDelete }: ItemsTableProps) {
                     </div>
                   )}
                 </div>
-                {item.nome}
+                {item.title}
               </td>
-              <td className="px-6 py-4">{item.categoria}</td>
-              <td className="px-6 py-4">{item.local}</td>
-              <td className="px-6 py-4">{item.data}</td>
-              <td className="px-6 py-4 font-medium">{item.status}</td>
+              <td className="px-6 py-4">{item.category}</td>
+              <td className="px-6 py-4">{item.location}</td>
+              <td className="px-6 py-4">{item.date_found ? formatarDataBR(item.date_found) : "Data não informada"}</td>
+              <td className="px-6 py-4 font-medium">{item.status === 'available' ? 'Disponível' : 'Retirado'}</td>
               <td className="px-6 py-4">
                 <div className="flex justify-center gap-4">
                   <button 

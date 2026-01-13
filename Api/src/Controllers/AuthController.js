@@ -21,7 +21,9 @@ const login = async (req, res) => {
             return res.status(401).json({ error: 'Credenciais inválidas' });
         }
 
-        const validPassword = await bcrypt.compare(password, user.password);
+        
+
+        const validPassword = await bcrypt.compare(password.trim(), user.password.trim());
         if (!validPassword) {
             console.log("Erro aqui na senha")
             return res.status(401).json({ error: 'Credenciais inválidas' });
@@ -71,5 +73,7 @@ const getProfile = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+
 
 module.exports = { login, getProfile };

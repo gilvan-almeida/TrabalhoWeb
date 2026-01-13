@@ -5,7 +5,7 @@ import LoginPage from '../pages/LoginPage';
 import HomeAdmPage from '../pages/HomeAdm';
 import ManagerPage from '../pages/ManagerPage';
 import UsersManagerPage from '../pages/UserManagerPage';
-
+import UserPage from '../pages/UserPage';
 
 function AppRoutes(){
     return(
@@ -15,6 +15,7 @@ function AppRoutes(){
             <Route path='/homeAdm' element={<HomeAdmPage/>}/>
             <Route path='/managerPage' element={<ManagerPage/>}/>
             <Route path='/managerUser' element={<UsersManagerPage/>}/>
+            <Route path='/perfil' element={<UserPage/>}/>
         </Routes>
     )
 }

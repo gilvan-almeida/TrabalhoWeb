@@ -2,41 +2,84 @@ import React from "react";
 import CardObject from "../../components/CardObject";
 import Navbar from "../../components/NavBar";
 import PesquisaBar from "../../components/PesquisaBar";
+import api from '../../Services/Api';
+import { useState, useEffect } from "react";
 
 function HomePage() {
-  return (
-    <div className="min-h-screen bg-white font-sans">
-      <Navbar />
-      
-      <main className="max-w-7xl mx-auto px-8 py-12">
-        
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Itens Encontrados</h1>
-          <p className="text-xl text-gray-700">Procurando por algo que perdeu?</p>
-        </div>
+    const [itens, setItens] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [termoPesquisa, setTermoPesquisa] = useState(""); 
 
-        <div className="mb-10">
-          <PesquisaBar />
-        </div>
+    const buscarItens = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get("/items"); 
+            setItens(response.data);
+        } catch (error) {
+            console.error("Erro ao carregar tabela:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        <div className="mb-6">
-          <span className="text-gray-600 text-lg">Exibindo 3 itens</span>
-        </div>
+    useEffect(() => {
+        buscarItens();
+    }, []);
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
-            <CardObject 
-                adminMode={false}
-                title="Relógio Cassio"
-                category="Acessórios"
-                location="Biblioteca - 2 bloco"
-                date="12/12/2025 - 14:30Hrs"
-                imageUrl="https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1000&auto=format&fit=crop"
-            />
+    const itensFiltrados = itens.filter((item) => {
+        const busca = termoPesquisa.toLowerCase();
+        return (
+            item.title.toLowerCase().includes(busca) || 
+            item.category.toLowerCase().includes(busca) ||
+            item.location.toLowerCase().includes(busca)
+        );
+    });
+
+    return (
+        <div className="min-h-screen bg-white font-sans">
+            <Navbar />
+
+            <main className="max-w-7xl mx-auto px-8 py-12">
+
+                <div className="mb-8">
+                    <h1 className="text-4xl font-bold text-gray-900 mb-2">Itens Encontrados</h1>
+                    <p className="text-xl text-gray-700">Procurando por algo que perdeu?</p>
+                </div>
+
+                <div className="mb-10">
+                    <PesquisaBar onSearch={(valor: string) => setTermoPesquisa(valor)} />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+                    {loading ? (
+                        <p className="text-gray-500">Carregando itens...</p>
+                    ) : itensFiltrados.length > 0 ? ( 
+                        itensFiltrados.map((item: any) => (
+                            <CardObject 
+                                key={item.id}
+                                adminMode={false}
+                                title={item.title}
+                                category={item.category}
+                                location={item.location}
+                                status={item.status}
+                                date={new Date(item.created_at).toLocaleString('pt-BR')}
+                                imageUrl={item.image_url || "https://via.placeholder.com/150"}
+                            />
+                        ))
+                    ) : (
+                        <div className="col-span-full text-center py-10">
+                            <p className="text-gray-500 text-lg">
+                                {termoPesquisa 
+                                    ? `Nenhum item encontrado para "${termoPesquisa}"` 
+                                    : "Nenhum item cadastrado no momento."}
+                            </p>
+                        </div>
+                    )}
+                </div>
+
+            </main>
         </div>
-        
-      </main>
-    </div>
-  );
+    );
 }
 
 export default HomePage;

@@ -5,6 +5,10 @@ import TableUser from "../../components/TableUser";
 import ModalNewUser from "../../components/ModalNewUser";
 import ModalEditUser from "../../components/ModalEditUser";
 import ModalAlert from "../../components/ModalAlert";
+import { useNavigate } from "react-router-dom";
+import api from '../../Services/Api';
+
+import { useEffect } from "react";
 
 function UsersManagerPage() {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -14,10 +18,41 @@ function UsersManagerPage() {
     const [userToDelete, setUserToDelete] = useState<any>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-    const [users, setUsers] = useState([
-        { id: 1, nome: "Admin Master", email: "admin@escola.com", cargo: "Administrador", status: "Ativo" },
-        { id: 2, nome: "João Silva", email: "joao@escola.com", cargo: "Funcionário", status: "Ativo" },
-    ]);
+    const [users, setUsers] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const userRaw = localStorage.getItem('@App:user');
+        const loggedUser = JSON.parse(userRaw || '{}');
+
+        console.log("Dados do usuário logado:", loggedUser);
+        const userRole = loggedUser.role || loggedUser.cargo || loggedUser.nome_do_cargo;
+
+        if (!userRole || userRole.trim().toLowerCase() !== 'admin') { 
+
+            alert(`Acesso Negado: Seu cargo atual é "Funcionario", mas apenas "Administradores" tem acesso.`);
+            navigate('/HomeAdm');
+        }
+    }, [navigate]);
+
+    const loadUsers = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get('/users');
+            setUsers(response.data);
+        } catch (error) {
+            console.error("Erro ao buscar usuários:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadUsers();
+    }, []);
+
 
     const handleEdit = (user: any) => {
         setUserToEdit(user);
@@ -29,9 +64,23 @@ function UsersManagerPage() {
         setIsDeleteModalOpen(true);
     };
 
-    const confirmDelete = () => {
-        setUsers(users.filter(u => u.id !== userToDelete.id));
-        setIsDeleteModalOpen(false);
+    const confirmDelete = async () => {
+        if (!userToDelete) return; 
+
+        try {
+            await api.delete(`/users/${userToDelete.id}`);
+            
+            alert("Usuário removido com sucesso!");
+
+            loadUsers(); 
+        } catch (error: any) {
+            console.error("Erro ao deletar:", error);
+            const msg = error.response?.data?.error || "Erro ao remover usuário.";
+            alert(msg);
+        } finally {
+            setIsDeleteModalOpen(false);
+            setUserToDelete(null);
+        }
     };
 
     return (
@@ -39,8 +88,18 @@ function UsersManagerPage() {
             <NavBarAdm openMenu={() => setMenuOpen(true)} />
             <Sidebar isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
-            <ModalNewUser isOpen={modalNewOpen} onClose={() => setModalNewOpen(false)} />
-            <ModalEditUser isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} user={userToEdit} />
+            <ModalNewUser 
+                isOpen={modalNewOpen} 
+                onClose={() => setModalNewOpen(false)} 
+                onSuccess={loadUsers}/>
+
+            <ModalEditUser 
+                isOpen={isEditModalOpen} 
+                onClose={() => setIsEditModalOpen(false)} 
+                user={userToEdit} 
+                onSuccess={loadUsers} 
+            />
+
             <ModalAlert 
                 isOpen={isDeleteModalOpen} 
                 onClose={() => setIsDeleteModalOpen(false)} 
